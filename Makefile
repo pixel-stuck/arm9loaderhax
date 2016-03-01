@@ -1,7 +1,7 @@
 .PHONY : all hax firm0 firm1 sector screen_init stage2 installer clean
 
 TARGET		=	arm9loaderhax
-PYTHON 		=	python2
+PYTHON 		=	python
 INDIR		=	data_input
 OUTDIR		=	data_output
 
