@@ -20,7 +20,7 @@ TARGET 		:=  $(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include source source/fatfs
+INCLUDES	:=	source 
 
 #---------------------------------------------------------------------------------
 # Setup some defines
@@ -32,11 +32,11 @@ INCLUDES	:=	include source source/fatfs
 ARCH	:=	-mthumb -mthumb-interwork
 
 CFLAGS	:=	-g -Wall -O2\
-			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
+			-flto -march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math -std=c99\
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE)
+CFLAGS	+=	$(INCLUDE) -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wsign-conversion -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 

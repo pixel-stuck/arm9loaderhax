@@ -138,9 +138,9 @@ const unsigned short Tbl[] = {  /*  CP437(0x80-0xFF) to Unicode conversion table
     0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0
 };
 
-DWORD get_fattime (void) {
-    //NO
-    return 0;
+static DWORD get_fattime (void) {
+    // fixed valid time of 1980-01-01 00:00:00
+    return 0x210000;
 }
 
 WCHAR ff_convert (  /* Converted character, Returns zero on error */
@@ -908,7 +908,7 @@ FRESULT sync_fs (   /* FR_OK: successful, FR_DISK_ERR: failed */
 /*-----------------------------------------------------------------------*/
 
 
-DWORD clust2sect (  /* !=0: Sector number, 0: Failed - invalid cluster# */
+static DWORD clust2sect (  /* !=0: Sector number, 0: Failed - invalid cluster# */
     FATFS* fs,      /* File system object */
     DWORD clst      /* Cluster# to be converted */
 )
@@ -926,7 +926,7 @@ DWORD clust2sect (  /* !=0: Sector number, 0: Failed - invalid cluster# */
 /*-----------------------------------------------------------------------*/
 
 
-DWORD get_fat ( /* 0xFFFFFFFF:Disk error, 1:Internal error, Else:Cluster status */
+static DWORD get_fat ( /* 0xFFFFFFFF:Disk error, 1:Internal error, Else:Cluster status */
     FATFS* fs,  /* File system object */
     DWORD clst  /* Cluster# to get the link information */
 )
@@ -946,7 +946,7 @@ DWORD get_fat ( /* 0xFFFFFFFF:Disk error, 1:Internal error, Else:Cluster status 
         wc = fs->win[bc % SS(fs)];
         bc++;
         if (move_window(fs, fs->fatbase + (bc / SS(fs)))) break;
-        wc |= fs->win[bc % SS(fs)] << 8;
+        wc |= (UINT)(fs->win[bc % SS(fs)] << 8);
         return clst & 1 ? wc >> 4 : (wc & 0xFFF);
 
     case FS_FAT16 :
@@ -1245,7 +1245,7 @@ FRESULT dir_next (  /* FR_OK:Succeeded, FR_NO_FILE:End of table, FR_DENIED:Could
     UINT i;
 
 
-    i = dp->index + 1;
+    i = (UINT)dp->index + 1;
     if (!(i & 0xFFFF) || !dp->sect) /* Report EOT when index has reached 65535 */
         return FR_NO_FILE;
 
@@ -1257,7 +1257,7 @@ FRESULT dir_next (  /* FR_OK:Succeeded, FR_NO_FILE:End of table, FR_DENIED:Could
                 return FR_NO_FILE;
         }
         else {                  /* Dynamic table */
-            if (((i / (SS(dp->fs) / SZ_DIR)) & (dp->fs->csize - 1)) == 0) { /* Cluster changed? */
+            if (((i / (SS(dp->fs) / SZ_DIR)) & (UINT)(dp->fs->csize - 1)) == 0) { /* Cluster changed? */
                 clst = get_fat(dp->fs, dp->clust);              /* Get next cluster */
                 if (clst <= 1) return FR_INT_ERR;
                 if (clst == 0xFFFFFFFF) return FR_DISK_ERR;
@@ -1389,7 +1389,7 @@ int cmp_lfn (           /* 1:Matched, 0:Not matched */
     WCHAR wc, uc;
 
 
-    i = ((dir[LDIR_Ord] & ~LLE) - 1) * 13;  /* Get offset in the LFN buffer */
+    i = (UINT)(((dir[LDIR_Ord] & ~LLE) - 1) * 13);  /* Get offset in the LFN buffer */
     s = 0;
     wc = 1;
     do {
@@ -1421,7 +1421,7 @@ int pick_lfn (          /* 1:Succeeded, 0:Buffer overflow */
     WCHAR wc, uc;
 
 
-    i = ((dir[LDIR_Ord] & 0x3F) - 1) * 13;  /* Offset in the LFN buffer */
+    i = (UINT)(((dir[LDIR_Ord] & 0x3F) - 1) * 13);  /* Offset in the LFN buffer */
 
     s = 0;
     wc = 1;
@@ -2200,7 +2200,7 @@ int get_ldnumber (      /* Returns logical drive number (-1:invalid drive) */
         for (tt = *path; (UINT)*tt >= (_USE_LFN ? ' ' : '!') && *tt != ':'; tt++) ; /* Find ':' in the path */
         if (*tt == ':') {   /* If a ':' is exist in the path name */
             tp = *path;
-            i = *tp++ - '0';
+            i = (UINT)(*tp++ - '0');
             if (i < 10 && tp == tt) {   /* Is there a numeric drive id? */
                 if (i < _VOLUMES) { /* If a drive id is found, get the value and strip it */
                     vol = (int)i;
@@ -2677,7 +2677,7 @@ FRESULT f_read (
 )
 {
     FRESULT res;
-    DWORD clst, sect, remain;
+    DWORD clst, sect = 0, remain;
     UINT rcnt, cc;
     BYTE csect, *rbuff = (BYTE*)buff;
 
@@ -2696,7 +2696,7 @@ FRESULT f_read (
     for ( ;  btr;                               /* Repeat until all data read */
             rbuff += rcnt, fp->fptr += rcnt, *br += rcnt, btr -= rcnt) {
         if ((fp->fptr % SS(fp->fs)) == 0) {     /* On the sector boundary? */
-            csect = (BYTE)(fp->fptr / SS(fp->fs) & (fp->fs->csize - 1));    /* Sector offset in the cluster */
+            csect = (BYTE)(fp->fptr / SS(fp->fs) & (UINT)(fp->fs->csize - 1));    /* Sector offset in the cluster */
             if (!csect) {                       /* On the cluster boundary? */
                 if (fp->fptr == 0) {            /* On the top of the file? */
                     clst = fp->sclust;          /* Follow from the origin */
@@ -2718,7 +2718,7 @@ FRESULT f_read (
             cc = btr / SS(fp->fs);              /* When remaining bytes >= sector size, */
             if (cc) {                           /* Read maximum contiguous sectors directly */
                 if (csect + cc > fp->fs->csize) /* Clip at cluster boundary */
-                    cc = fp->fs->csize - csect;
+                    cc = (UINT)(fp->fs->csize - csect);
                 if (disk_read(fp->fs->drv, rbuff, sect, cc))
                     ABORT(fp->fs, FR_DISK_ERR);
 #if !_FS_READONLY && _FS_MINIMIZE <= 2          /* Replace one of the read sectors with cached data if it contains a dirty sector */

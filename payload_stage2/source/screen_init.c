@@ -1,3 +1,4 @@
+#include "screen_init.h"
 #include "i2c.h"
 
 void screenInit()

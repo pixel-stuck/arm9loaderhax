@@ -64,9 +64,11 @@ DRESULT disk_read (
     {
         switch(pdrv){
         case 0:
-            if (sdmmc_sdcard_readsectors(sector,count,buff))
+            if (sdmmc_sdcard_readsectors(sector, count, buff))
             return RES_PARERR;
             break;
+	default:
+	    return RES_PARERR; //Bad drive parameter given to us
         }
         return RES_OK;
     }
@@ -91,9 +93,11 @@ DRESULT disk_write (
     {
         switch(pdrv){
             case 0:
-                if (sdmmc_sdcard_writesectors(sector,count,buff))
+                if (sdmmc_sdcard_writesectors(sector, count, buff))
                     return RES_PARERR;
                 break;
+	    default:
+	        return RES_PARERR; //Bad drive parameter given to us
         }
         return RES_OK;
     }

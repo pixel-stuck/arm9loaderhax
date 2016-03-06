@@ -12,7 +12,7 @@
 extern u8 screen_init_bin[];
 extern u32 screen_init_bin_size;
 
-void ownArm11()
+static void ownArm11()
 {
 	memcpy((void*)A11_PAYLOAD_LOC, screen_init_bin, screen_init_bin_size);
 	*((u32*)0x1FFAED80) = 0xE51FF004;
@@ -26,7 +26,7 @@ void ownArm11()
 }
 
 //fixes the snow issue
-void clearScreen(void)
+static void clearScreen(void)
 {
 	for(int i = 0; i < (SCREEN_SIZE); i++)
 	{
@@ -54,17 +54,17 @@ int main()
 
 	FATFS fs;
 	FIL payload;
-	u32 br;
+	unsigned int br;
 	
+	screenInit();
 		
 	f_mount(&fs, "0:", 0); //This never fails due to deferred mounting
 	if(f_open(&payload, "arm9loaderhax.bin", FA_READ | FA_OPEN_EXISTING) == FR_OK)
 	{
 		ownArm11();
 		clearScreen();
-		screenInit();
 
-		f_read(&payload, PAYLOAD_ADDRESS, PAYLOAD_SIZE, &br);
+		f_read(&payload, (void*)PAYLOAD_ADDRESS, PAYLOAD_SIZE, &br);
 		((void (*)())PAYLOAD_ADDRESS)();
 	}
 	

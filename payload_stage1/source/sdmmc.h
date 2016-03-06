@@ -127,11 +127,5 @@ void sdmmc_blktransferinit();*/
 
 int sdmmc_sdcard_init();
 
-int sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out);
-int sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, u8 *in);
-
-mmcdevice *getMMCDevice(int drive);
-
-void InitSDMMC();
-int Nand_Init();
+u32 sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out);
 
