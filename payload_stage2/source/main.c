@@ -4,7 +4,6 @@
 #include "screen_init.h"
 
 #define PAYLOAD_ADDRESS		0x23F00000
-#define PAYLOAD_SIZE		0x00100000
 #define A11_PAYLOAD_LOC	 0x1FFF4C80  //keep in mind this needs to be changed in the ld script for screen_init too
 #define SCREEN_SIZE		 400 * 240 * 3 / 4 //yes I know this is more than the size of the bootom screen
 
@@ -64,7 +63,7 @@ int main()
 		ownArm11();
 		clearScreen();
 
-		f_read(&payload, (void*)PAYLOAD_ADDRESS, PAYLOAD_SIZE, &br);
+		f_read(&payload, (void*)PAYLOAD_ADDRESS, f_size(&payload), &br);
 		((void (*)())PAYLOAD_ADDRESS)();
 	}
 	
