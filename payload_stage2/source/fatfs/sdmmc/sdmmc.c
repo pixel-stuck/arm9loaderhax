@@ -7,24 +7,8 @@
 #include "sdmmc.h"
 #include "delay.h"
 
-typedef struct mmcdevice {
-    vu8* data;
-    u32 size;
-    u32 error;
-    u16 stat0;
-    u16 stat1;
-    u32 ret[4];
-    u32 initarg;
-    u32 isSDHC;
-    u32 clk;
-    u32 SDOPT;
-    u32 devicenumber;
-    u32 total_size; //size in sectors of the device
-    u32 res;
-} mmcdevice;
-
-static struct mmcdevice handleNAND;
-static struct mmcdevice handleSD;
+struct mmcdevice handleNAND;
+struct mmcdevice handleSD;
 
 static inline u16 sdmmc_read16(u16 reg) {
     return *(vu16*)(SDMMC_BASE + reg);
@@ -57,7 +41,7 @@ static inline void setckl(u32 data)
 }
 
 
-static mmcdevice *getMMCDevice(int drive)
+mmcdevice *getMMCDevice(int drive)
 {
     if(drive==0) return &handleNAND;
     return &handleSD;
@@ -168,7 +152,7 @@ static void __attribute__((noinline)) sdmmc_send_command(struct mmcdevice *ctx, 
     }
 }
 
-u32 __attribute__((noinline)) sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const vu8 *in)
+u32 __attribute__((noinline)) sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, vu8 *in)
 {
     if (handleSD.isSDHC == 0)
         sector_no <<= 9;
@@ -212,7 +196,7 @@ u32 __attribute__((noinline)) sdmmc_nand_readsectors(u32 sector_no, u32 numsecto
     return geterror(&handleNAND);
 }
 
-u32 __attribute__((noinline)) sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const vu8 *in) //experimental
+u32 __attribute__((noinline)) sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, vu8 *in) //experimental
 {
     if (handleNAND.isSDHC == 0)
         sector_no <<= 9;
@@ -302,7 +286,7 @@ static void InitSD()
 static int Nand_Init()
 {
     inittarget(&handleNAND);
-    ioDelay(0xF000);
+    waitcycles(0xF000);
 
     sdmmc_send_command(&handleNAND,0,0);
 
@@ -353,7 +337,7 @@ static int SD_Init()
 {
     inittarget(&handleSD);
 
-    ioDelay(1u << 18); //Card needs a little bit of time to be detected, it seems
+    waitcycles(1u << 18); //Card needs a little bit of time to be detected, it seems
     
     //If not inserted
     if (!(*((vu16*)0x1000601c) & TMIO_STAT0_SIGSTATE)) return -1;
