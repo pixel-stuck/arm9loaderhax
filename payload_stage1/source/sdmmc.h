@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "common.h"
+#include "types.h"
 
 #define SDMMC_BASE              0x10006000u
 
@@ -119,9 +119,7 @@ typedef struct mmcdevice {
 } mmcdevice;
 
 /*int sdmmc_sdcard_init();
-void sdmmc_sdcard_readsector(uint32_t sector_no, void *out);
 void sdmmc_sdcard_readsectors(uint32_t sector_no, uint32_t numsectors, void *out);
-void sdmmc_sdcard_writesector(uint32_t sector_no, void *in);
 void sdmmc_sdcard_writesectors(uint32_t sector_no, uint32_t numsectors, void *in);
 void sdmmc_blktransferinit();*/
 

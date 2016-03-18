@@ -1,12 +1,10 @@
-#include "common.h"
+#include "types.h"
 #include "sdmmc.h"
 #include "i2c.h"
 
-int main()
+void main()
 {
     // Initialize sdcard and nand
-    *(vu32*)0x10000020 = 0;
-    *(vu32*)0x10000020 = 0x340;
     sdmmc_sdcard_init();
 
     if(i2cReadRegister(I2C_DEV_MCU, 0x10) & 0x4) //if home button is pressed
@@ -22,6 +20,5 @@ int main()
     
     // Jump to secondary payload
     ((void (*)())0x08006000)();
-    return 0;
 }
 

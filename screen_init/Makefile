@@ -18,9 +18,9 @@ LIB_DIR:=lib
 DEP_DIR:=obj/$(LIBNAME)
 
 LIBS=
-CFLAGS=-std=gnu99 -Os -g -mword-relocations -fomit-frame-pointer -ffast-math
-C9FLAGS=-mcpu=arm946e-s -march=armv5te -mlittle-endian
-C11FLAGS=-mcpu=mpcore -mlittle-endian
+CFLAGS= -g -Wall -O2 -mword-relocations\
+	-ffast-math -Wno-main -std=c99\
+	-mcpu=mpcore -mlittle-endian $(ARCH)
 LDFLAGS=$(LIBS)
 OCFLAGS=--set-section-flags .bss=alloc,load,contents
 
@@ -40,15 +40,15 @@ screen_init.bin: $(OBJS)
 
 obj/%.o: source/%.c | dirs
 	@echo Compiling $<
-	$(CC) -c $(CFLAGS) $(C11FLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 obj/%.o: source/%.s | dirs
 	@echo Compiling $<
-	$(CC) -c $(CFLAGS) $(C11FLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 obj/%.o: source/%.S | dirs
 	@echo Compiling $<
-	$(CC) -c $(CFLAGS) $(C11FLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 dirs: ${OUT_DIR}
 
