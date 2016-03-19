@@ -1,14 +1,14 @@
-.PHONY : stage1 screen_init stage2
+.PHONY : stage1 arm11 stage2
 
 OUTDIR = out
 
-all : $(OUTDIR) stage1 screen_init stage2
+all : $(OUTDIR) stage1 arm11 stage2
 
 $(OUTDIR):
 	@[ -d $(OUTDIR) ] || mkdir -p $(OUTDIR)
 
-screen_init:
-	@$(MAKE) -C screen_init
+arm11:
+	@$(MAKE) -C arm11
 
 stage1:
 	@$(MAKE) -C payload_stage1
@@ -16,12 +16,12 @@ stage1:
 
 stage2:
 	@[ -d payload_stage2/data ] || mkdir -p payload_stage2/data
-	@mv screen_init/screen_init.bin payload_stage2/data
+	@mv arm11/arm11.bin payload_stage2/data
 	@$(MAKE) -C payload_stage2
 	@mv payload_stage2/payload_stage2.bin $(OUTDIR)
 
 clean:
 	@$(MAKE) -C payload_stage1 clean
-	@$(MAKE) -C screen_init clean
+	@$(MAKE) -C arm11 clean
 	@$(MAKE) -C payload_stage2 clean
 	@rm -rf $(OUTDIR)

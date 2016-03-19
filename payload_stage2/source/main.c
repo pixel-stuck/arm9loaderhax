@@ -7,12 +7,12 @@
 #define A11_PAYLOAD_LOC 0x1FFF4C80 //keep in mind this needs to be changed in the ld script for arm11 too
 #define A11_ENTRY       0x1FFFFFF8
 
-extern u8 screen_init_bin[];
-extern u32 screen_init_bin_size;
+extern u8 arm11_bin[];
+extern u32 arm11_bin_size;
 
 static void ownArm11()
 {
-    memcpy((void*)A11_PAYLOAD_LOC, screen_init_bin, screen_init_bin_size);
+    memcpy((void*)A11_PAYLOAD_LOC, arm11_bin, arm11_bin_size);
     *(vu32 *)A11_ENTRY = 1;
     *(vu32 *)0x1FFAED80 = 0xE51FF004;
     *(vu32 *)0x1FFAED84 = A11_PAYLOAD_LOC;
