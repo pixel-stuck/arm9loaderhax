@@ -1,4 +1,4 @@
-.PHONY : all hax firm0 firm1 sector screen_init stage2 installer clean
+.PHONY : all hax firm0 firm1 sector screen_init stage2 installer safe clean
 
 TARGET		=	arm9loaderhax
 PYTHON 		=	python
