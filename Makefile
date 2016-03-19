@@ -1,4 +1,4 @@
-.PHONY : all hax firm0 firm1 sector screen_init stage2 installer clean
+.PHONY : all hax firm0 firm1 sector screen_init stage2 installer safe clean
 
 TARGET		=	arm9loaderhax
 PYTHON 		=	python
@@ -43,6 +43,21 @@ installer:
 	@cp $(OUTDIR)/stage0x5C000.bin  payload_installer/brahma2/data/stage2.bin
 	@cd payload_installer && make TARGET=../$(OUTDIR)/$(TARGET)
 	@echo INSTALLER done!
+
+safe:
+	@mkdir -p $(OUTDIR)
+	@cd payload_stage1 && make
+	@cp payload_stage1/payload_stage1.bin $(OUTDIR)/payload_stage1.bin
+	@[ -d payload_stage2/data ] || mkdir -p payload_stage2/data
+	$(MAKE) -C screen_init
+	@cp screen_init/screen_init.bin payload_stage2/data/	
+	@$(MAKE) -C payload_stage2
+	@cp payload_stage2/payload_stage2.bin $(OUTDIR)/payload_stage2.bin
+	@cp $(INDIR)/new3ds90.firm $(OUTDIR)/firm0.bin
+	@cp $(INDIR)/new3ds10.firm $(OUTDIR)/firm1.bin
+	@cp $(INDIR)/otp.bin $(OUTDIR)/otp.bin
+	@cp $(INDIR)/secret_sector.bin $(OUTDIR)/secret_sector.bin
+	@echo Ready!
 
 clean:
 	@echo clean...
