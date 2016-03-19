@@ -35,7 +35,7 @@ OUT_DIR= obj/$(LIBNAME)
 all: screen_init.bin
 
 screen_init.bin: $(OBJS)
-	$(CC) -nostartfiles --specs=$(LIBNAME).specs $(OBJS) $(LDFLAGS) -o $(ELFNAME)
+	$(CC) -nostartfiles --specs=../common/$(LIBNAME).specs $(OBJS) $(LDFLAGS) -o $(ELFNAME)
 	$(OC) $(OCFLAGS) -O binary $(ELFNAME) $(BINNAME)
 
 obj/%.o: source/%.c | dirs

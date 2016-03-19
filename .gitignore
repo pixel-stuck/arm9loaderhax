@@ -1,9 +1,9 @@
 screen_init/obj
-data_output
-data_input
-payload_installer/brahma2/data/
+out
 payload_stage1/build
 payload_stage2/build
 payload_stage2/data
 *.elf
 *.bin
+*.o
+*.d
