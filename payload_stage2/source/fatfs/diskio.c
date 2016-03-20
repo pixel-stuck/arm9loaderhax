@@ -10,7 +10,6 @@
 #include "diskio.h"		/* FatFs lower layer API */
 #include "sdmmc/sdmmc.h"
 
-static DSTATUS status;
 
 /*-----------------------------------------------------------------------*/
 /* Get Drive Status                                                      */
@@ -21,7 +20,7 @@ DSTATUS disk_status (
 	BYTE pdrv		/* Physical drive nmuber to identify the drive */
 )
 {
-	return status;
+	return RES_OK;
 }
 
 
@@ -35,13 +34,8 @@ DSTATUS disk_initialize (
 	BYTE pdrv				/* Physical drive nmuber to identify the drive */
 )
 {
-    int result = sdmmc_sdcard_init();
-    if (result)
-    {
-        status = STA_NOINIT;
-    }
-    status = RES_OK;
-    return status;
+	sdmmc_sdcard_init();
+	return RES_OK;
 }
 
 
@@ -58,15 +52,11 @@ DRESULT disk_read (
 	UINT count		/* Number of sectors to read */
 )
 {
-    if (!status)
-    {
 	if (sdmmc_sdcard_readsectors(sector, count, buff)) {
 		return RES_PARERR;
 	}
 
 	return RES_OK;
-    }
-    return RES_NOTRDY;
 }
 
 
@@ -79,20 +69,16 @@ DRESULT disk_read (
 DRESULT disk_write (
 	__attribute__((unused))
 	BYTE pdrv,			/* Physical drive nmuber to identify the drive */
-	const BYTE *buff,	/* Data to be written */
+	const BYTE *buff,       	/* Data to be written */
 	DWORD sector,		/* Sector address in LBA */
 	UINT count			/* Number of sectors to write */
 )
 {
-    if (!status)
-    {
 	if (sdmmc_sdcard_writesectors(sector, count, (BYTE *)buff)) {
 		return RES_PARERR;
 	}
 
 	return RES_OK;
-    }
-    return RES_NOTRDY;
 }
 #endif
 
@@ -112,8 +98,6 @@ DRESULT disk_ioctl (
 	void *buff		/* Buffer to send/receive control data */
 )
 {
-    if (!status)
-        return RES_OK;
-    return RES_NOTRDY;
+	return RES_PARERR;
 }
 #endif
