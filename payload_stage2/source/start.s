@@ -3,7 +3,4 @@
 .global _start
 _start:
 
-    bl main
-
-.die:
-    b .die
+    b main
