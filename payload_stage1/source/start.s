@@ -7,19 +7,6 @@ _start:
     orr r0, r0, #0x80
     msr cpsr_c, r0
 
-    @ Enable caches
-    mrc p15, 0, r0, c1, c0, 0  @ read control register
-    orr r0, r0, #(1<<12)       @ - instruction cache enable
-    orr r0, r0, #(1<<2)        @ - data cache enable
-    orr r0, r0, #(1<<0)        @ - mpu enable
-    mcr p15, 0, r0, c1, c0, 0  @ write control register
-
-    @ Flush caches
-    mov r0, #0
-    mcr p15, 0, r0, c7, c5, 0  @ flush I-cache
-    mcr p15, 0, r0, c7, c6, 0  @ flush D-cache
-    mcr p15, 0, r0, c7, c10, 4 @ drain write buffer
-
     @ Change the stack pointer
     mov sp, #0x27000000
 
@@ -49,6 +36,19 @@ _start:
     mcr p15, 0, r8, c3, c0, 0	@ Write bufferable 0, 3, 5
     mcr p15, 0, r8, c2, c0, 0	@ Data cacheable 0, 3, 5
     mcr p15, 0, r8, c2, c0, 1	@ Inst cacheable 0, 3, 5
+
+    @ Enable caches
+    mrc p15, 0, r0, c1, c0, 0  @ read control register
+    orr r0, r0, #(1<<12)       @ - instruction cache enable
+    orr r0, r0, #(1<<2)        @ - data cache enable
+    orr r0, r0, #(1<<0)        @ - mpu enable
+    mcr p15, 0, r0, c1, c0, 0  @ write control register
+
+    @ Flush caches
+    mov r0, #0
+    mcr p15, 0, r0, c7, c5, 0  @ flush I-cache
+    mcr p15, 0, r0, c7, c6, 0  @ flush D-cache
+    mcr p15, 0, r0, c7, c10, 4 @ drain write buffer
 
     @ Fix mounting of SDMC
     ldr r0, =0x10000020
