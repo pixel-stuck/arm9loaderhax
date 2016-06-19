@@ -34,7 +34,6 @@ flushCaches:
     mcr p15, 0, r1, c7, c10, 4              @ drain write buffer
 
     @ Flush instruction cache
-    mov r0, #0
-    mcr p15, 0, r0, c7, c5, 0
+    mcr p15, 0, r1, c7, c5, 0
 
     bx lr

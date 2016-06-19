@@ -18,7 +18,7 @@ _start:
     mcr p15, 0, r0, c1, c0, 0  @ write control register
 
     @ Flush caches
-    blx flushCaches
+    bl flushCaches
 
     @ Give read/write access to all the memory regions
     ldr r0, =0x33333333
