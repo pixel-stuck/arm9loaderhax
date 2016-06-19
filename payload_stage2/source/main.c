@@ -1,6 +1,7 @@
 #include "types.h"
 #include "memory.h"
 #include "i2c.h"
+#include "cache.h"
 #include "fatfs/ff.h"
 #include "../build/bundled.h"
 
@@ -39,6 +40,9 @@ void main(void)
         i2cWriteRegister(3, 0x22, 0x2A); //Turn on backlight
         unsigned int read;
         f_read(&payload, (void *)PAYLOAD_ADDRESS, f_size(&payload), &read);
+
+        flushCaches();
+
         ((void (*)())PAYLOAD_ADDRESS)();
     }
 

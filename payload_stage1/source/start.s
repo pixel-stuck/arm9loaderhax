@@ -17,6 +17,9 @@ _start:
     bic r0, #(1<<0)            @ - mpu disable
     mcr p15, 0, r0, c1, c0, 0  @ write control register
 
+    @ Flush caches
+    blx flushCaches
+
     @ Give read/write access to all the memory regions
     ldr r0, =0x33333333
     mcr p15, 0, r0, c5, c0, 2 @ write data access
@@ -50,12 +53,6 @@ _start:
     orr r0, r0, #(1<<2)        @ - data cache enable
     orr r0, r0, #(1<<0)        @ - mpu enable
     mcr p15, 0, r0, c1, c0, 0  @ write control register
-
-    @ Flush caches
-    mov r0, #0
-    mcr p15, 0, r0, c7, c5, 0  @ flush I-cache
-    mcr p15, 0, r0, c7, c6, 0  @ flush D-cache
-    mcr p15, 0, r0, c7, c10, 4 @ drain write buffer
 
     @ Fix mounting of SDMC
     ldr r0, =0x10000020
