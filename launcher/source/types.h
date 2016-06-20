@@ -1,12 +1,6 @@
-/*
-*   types.h
-*/
-
 #pragma once
 
-#include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 
 //Common data types
 typedef uint8_t u8;

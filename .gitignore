@@ -1,4 +1,5 @@
-screen_init/obj
+arm11/build
+launcher/build
 out
 payload_stage1/build
 payload_stage2/build

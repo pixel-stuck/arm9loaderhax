@@ -3,7 +3,7 @@
 ## What this is
 
 This is a fork of delebile's A9LH implementation, this exploit is documented [here](http://3dbrew.org/wiki/3DS_System_Flaws) and also presented [in this conference](https://media.ccc.de/v/32c3-7240-console_hacking), and provides ARM9 code execution directly at boot, exploiting a vulnerability present in the 9.6+ version of the New3DS arm9loader.  
-It is as minimal as it can be.  
+It has no screen init and is as minimal as it can be.  
 The exploit was found by **plutoo** and **yellows8**.
 
 ## Usage
