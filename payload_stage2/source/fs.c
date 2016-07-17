@@ -40,11 +40,15 @@ u32 fileRead(void *dest, const char *path)
     return size;
 }
 
-void firmRead(void *dest)
+void firmRead(void *dest, u32 firmType)
 {
-    const char *firmFolders[] = { "00000002", "20000002" };
+    const char *firmFolders[4][2] = {{ "00000002", "20000002" },
+                                     { "00000102", "20000102" },
+                                     { "00000202", "20000202" },
+                                     { "00000003", "20000003" }};
+
     char path[48] = "1:/title/00040138/00000000/content";
-    memcpy(&path[18], firmFolders[console], 8);
+    memcpy(&path[18], firmFolders[firmType][console], 8);
 
     DIR dir;
     FILINFO info;

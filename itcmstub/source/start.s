@@ -2,11 +2,11 @@
 .align 4
 .global _start
 _start:
-    @ Disable interrupts
-    mrs r0, cpsr
-    orr r0, r0, #0x80
-    msr cpsr_c, r0
+    b start
 
+    .word 0, 0
+
+start:
     @ Change the stack pointer
     mov sp, #0x27000000
 

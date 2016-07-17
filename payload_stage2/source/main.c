@@ -3,7 +3,6 @@
 */
 
 #include "types.h"
-#include "buttons.h"
 #include "memory.h"
 #include "i2c.h"
 #include "cache.h"
@@ -34,7 +33,7 @@ static inline void clearScreens(void)
     memset32((void *)0x18346500, 0, 0x38400);
 }
 
-void main(void)
+static inline void loadPayload(void)
 {
     mountSD();
 
@@ -67,15 +66,21 @@ void main(void)
     if(payloadFound)
     {
         flushCaches();
-
         ((void (*)())PAYLOAD_ADDRESS)();
     }
 
     unmountSD();
+}
 
-    //If the SAFE_MODE combo is not pressed, try to patch and boot the CTRNAND FIRM
-    if(HID_PAD != SAFE_MODE) loadFirm();
+void main(void)
+{
+    //Not a firmlaunch
+    if(!*(vu8 *)0x08006005) loadPayload();
 
+    //Start CFW
+    loadFirm();
+
+    //Shutdown
     flushCaches();
     i2cWriteRegister(I2C_DEV_MCU, 0x20, 1);
     while(1);

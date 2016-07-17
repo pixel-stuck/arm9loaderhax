@@ -12,4 +12,4 @@ void mountSD(void);
 void unmountSD(void);
 u32 mountCTRNAND(void);
 u32 fileRead(void *dest, const char *path);
-void firmRead(void *dest);
+void firmRead(void *dest, u32 firmType);
