@@ -7,4 +7,6 @@ _start:
 
     b main
 
+.global screenInit
+screenInit:
     .word 0

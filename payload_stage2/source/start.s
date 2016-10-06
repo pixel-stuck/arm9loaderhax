@@ -4,5 +4,3 @@
 _start:
 
     b main
-
-    .word 0, 0

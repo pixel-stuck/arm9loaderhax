@@ -14,8 +14,9 @@ OC := arm-none-eabi-objcopy
 name := $(shell basename $(CURDIR))
 
 dir_source := source
+dir_arm11 := arm11
 dir_build := build
-dir_data := data
+dir_out := ../out
 
 ASFLAGS := -mcpu=arm946e-s
 CFLAGS  := -Wall -Wextra -MMD -MP -mthumb -mthumb-interwork $(ASFLAGS) -fno-builtin -std=c11 -Wno-main -O2 -flto -ffast-math
@@ -25,7 +26,7 @@ objects = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
           $(patsubst $(dir_source)/%.c, $(dir_build)/%.o, \
           $(call rwildcard, $(dir_source), *.s *.c)))
 
-bundledobjects = $(dir_build)/arm11.bin.o $(dir_build)/launcher.bin.o $(dir_build)/itcmstub.bin.o $(dir_build)/reboot.bin.o
+bundled = $(dir_build)/arm11.bin.o
 
 define bin2o
 	bin2s $< | $(AS) -o $(@)
@@ -34,21 +35,25 @@ define bin2o
 endef
 
 .PHONY: all
-all: $(name).bin
+all: $(dir_out)/$(name).bin
 
 .PHONY: clean
 clean:
-	@rm -rf $(dir_build) $(dir_data)
+	@$(MAKE) -C $(dir_arm11) clean
+	@rm -rf $(dir_build)
 
-$(name).bin: $(dir_build)/$(name).elf
+$(dir_out)/$(name).bin: $(dir_build)/$(name).elf
 	$(OC) -S -O binary $< $@
 
-$(dir_build)/$(name).elf: $(bundledobjects) $(objects)
+$(dir_build)/$(name).elf: $(bundled) $(objects)
 	$(LINK.o) -T linker.ld $(OUTPUT_OPTION) $^
 
-$(dir_build)/%.bin.o: $(dir_data)/%.bin
-	@mkdir -p "$(@D)"
+$(dir_build)/%.bin.o: $(dir_build)/%.bin
 	@$(bin2o)
+
+$(dir_build)/arm11.bin: $(dir_arm11)
+	@mkdir -p "$(@D)"
+	@$(MAKE) -C $<
 
 $(dir_build)/memory.o: CFLAGS += -O3
 

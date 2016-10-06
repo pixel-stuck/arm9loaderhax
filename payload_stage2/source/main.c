@@ -7,81 +7,63 @@
 #include "i2c.h"
 #include "cache.h"
 #include "fs.h"
-#include "firm.h"
 #include "../build/bundled.h"
 
 #define A11_PAYLOAD_LOC 0x1FFF4C80 //Keep in mind this needs to be changed in the ld script for arm11 too
-#define A11_ENTRY       0x1FFFFFF8
+#define A11_ENTRYPOINT  0x1FFFFFF8
+#define PAYLOAD_ADDRESS 0x23F00000
 
-static void ownArm11(u32 screenInit)
+static void ownArm11(bool isScreenInit)
 {
     memcpy((void *)A11_PAYLOAD_LOC, arm11_bin, arm11_bin_size);
 
     //Let the ARM11 code know if it needs to screen init
-    *(vu32 *)(A11_PAYLOAD_LOC + 8) = screenInit;
+    ((vu32 *)A11_PAYLOAD_LOC)[2] = isScreenInit ? 1 : 0;
 
-    *(vu32 *)A11_ENTRY = 1;
+    *(vu32 *)A11_ENTRYPOINT = 1;
     *(vu32 *)0x1FFAED80 = 0xE51FF004;
     *(vu32 *)0x1FFAED84 = A11_PAYLOAD_LOC;
     *(vu8 *)0x1FFFFFF0 = 2;
-    while(*(vu32 *)A11_ENTRY);
-}
-
-static inline void clearScreens(void)
-{
-    memset32((void *)0x18300000, 0, 0x46500);
-    memset32((void *)0x18346500, 0, 0x38400);
+    while(*(vu32 *)A11_ENTRYPOINT != 0);
 }
 
 static inline void loadPayload(void)
 {
-    mountSD();
-
-    u32 payloadFound;
+    bool payloadFound;
 
     //No-screeninit payload
     if(fileRead((void *)PAYLOAD_ADDRESS, "arm9loaderhax.bin"))
     {
-        payloadFound = 1;
-        ownArm11(0);
+        payloadFound = true;
+        ownArm11(false);
     }
 
     //Screeninit payload
     else if(fileRead((void *)PAYLOAD_ADDRESS, "arm9loaderhax_si.bin"))
     {
-        payloadFound = 1;
-        ownArm11(1);
-        clearScreens();
+        payloadFound = true;
+        ownArm11(true);
         i2cWriteRegister(3, 0x22, 0x2A); //Turn on backlight
     }
 
     //No payload found/no SD inserted
-    else
-    {
-        payloadFound = 0;
-        ownArm11(0);
-    }
+    else payloadFound = false;
 
     //Jump to payload
     if(payloadFound)
     {
-        flushCaches();
+        flushEntireDCache();
+        flushEntireICache();
         ((void (*)())PAYLOAD_ADDRESS)();
     }
-
-    unmountSD();
 }
 
 void main(void)
 {
-    //Not a firmlaunch
-    if(!*(vu8 *)0x08006005) loadPayload();
-
-    //Start CFW
-    loadFirm();
+    if(mountSd()) loadPayload();
 
     //Shutdown
-    flushCaches();
-    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1);
-    while(1);
+    flushEntireDCache();
+    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
+    while(true);
 }

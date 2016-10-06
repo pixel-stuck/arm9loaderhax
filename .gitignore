@@ -1,9 +1,7 @@
-arm11/build
-launcher/build
 out
 payload_stage1/build
 payload_stage2/build
-payload_stage2/data
+payload_stage2/arm11/build
 *.elf
 *.bin
 *.o

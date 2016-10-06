@@ -2,12 +2,13 @@
 
 #define BRIGHTNESS 0x39
 
+extern u32 screenInit;
+
 void main(void)
 {
-    vu32 *arm11 = (u32 *)0x1FFFFFF8;
+    vu32 *arm11Entry = (vu32 *)0x1FFFFFF8;
 
-    //Screen init routine
-    if(*(vu32 *)0x1FFF4C88)
+    if(screenInit != 0)
     {
         *(vu32 *)0x10141200 = 0x1007F;
         *(vu32 *)0x10202014 = 0x00000001;
@@ -18,7 +19,7 @@ void main(void)
         *(vu32 *)0x10202244 = 0x1023E;
         *(vu32 *)0x10202A44 = 0x1023E;
 
-        // Top screen
+        //Top screen
         *(vu32 *)0x10400400 = 0x000001c2;
         *(vu32 *)0x10400404 = 0x000000d1;
         *(vu32 *)0x10400408 = 0x000001c1;
@@ -48,11 +49,11 @@ void main(void)
         *(vu32 *)0x10400490 = 0x000002D0;
         *(vu32 *)0x1040049C = 0x00000000;
 
-        // Disco register
+        //Disco register
         for(u32 i = 0; i < 256; i++)
             *(vu32 *)0x10400484 = 0x10101 * i;
 
-        // Bottom screen
+        //Bottom screen
         *(vu32 *)0x10400500 = 0x000001c2;
         *(vu32 *)0x10400504 = 0x000000d1;
         *(vu32 *)0x10400508 = 0x000001c1;
@@ -82,29 +83,44 @@ void main(void)
         *(vu32 *)0x10400590 = 0x000002D0;
         *(vu32 *)0x1040059C = 0x00000000;
 
-        // Disco register
+        //Disco register
         for(u32 i = 0; i < 256; i++)
             *(vu32 *)0x10400584 = 0x10101 * i;
 
-        *(vu32 *)0x10400468 = 0x18300000;
-        *(vu32 *)0x1040046c = 0x18300000;
-        *(vu32 *)0x10400494 = 0x18300000;
-        *(vu32 *)0x10400498 = 0x18300000;
-        *(vu32 *)0x10400568 = 0x18346500;
-        *(vu32 *)0x1040056c = 0x18346500;
-
         //Set CakeBrah framebuffers
-        *((vu32 *)0x23FFFE00) = 0x18300000;
-        *((vu32 *)0x23FFFE04) = 0x18300000;
-        *((vu32 *)0x23FFFE08) = 0x18346500;
+        fb->top_left = (u8 *)0x18300000;
+        fb->top_right = (u8 *)0x18300000;
+        fb->bottom = (u8 *)0x18346500;
+
+        *(vu32 *)0x10400468 = (u32)fb->top_left;
+        *(vu32 *)0x1040046c = (u32)fb->top_left;
+        *(vu32 *)0x10400494 = (u32)fb->top_right;
+        *(vu32 *)0x10400498 = (u32)fb->top_right;
+        *(vu32 *)0x10400568 = (u32)fb->bottom;
+        *(vu32 *)0x1040056c = (u32)fb->bottom;
+
+        vu32 *REGs_PSC0 = (vu32 *)0x10400010,
+             *REGs_PSC1 = (vu32 *)0x10400020;
+
+        REGs_PSC0[0] = (u32)fb->top_left >> 3; //Start address
+        REGs_PSC0[1] = (u32)(fb->top_left + SCREEN_TOP_FBSIZE) >> 3; //End address
+        REGs_PSC0[2] = 0; //Fill value
+        REGs_PSC0[3] = (2 << 8) | 1; //32-bit pattern; start
+
+        REGs_PSC1[0] = (u32)fb->bottom >> 3; //Start address
+        REGs_PSC1[1] = (u32)(fb->bottom + SCREEN_BOTTOM_FBSIZE) >> 3; //End address
+        REGs_PSC1[2] = 0; //Fill value
+        REGs_PSC1[3] = (2 << 8) | 1; //32-bit pattern; start
+
+        while(!((REGs_PSC0[3] & 2) && (REGs_PSC1[3] & 2)));
     }
 
-    //Clear ARM11 entry offset
-    *arm11 = 0;
+    //Clear ARM11 entrypoint
+    *arm11Entry = 0;
 
-    //Wait for the entry to be set
-    while(!*arm11);
+    //Wait for the entrypoint to be set
+    while(!*arm11Entry);
 
     //Jump to it
-    ((void (*)())*arm11)();
+    ((void (*)())*arm11Entry)();
 }

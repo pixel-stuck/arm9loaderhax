@@ -6,10 +6,5 @@
 
 #include "types.h"
 
-extern u32 console;
-
-void mountSD(void);
-void unmountSD(void);
-u32 mountCTRNAND(void);
+bool mountSd(void);
 u32 fileRead(void *dest, const char *path);
-void firmRead(void *dest, u32 firmType);
