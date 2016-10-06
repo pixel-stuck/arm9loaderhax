@@ -7,4 +7,4 @@
 #include "types.h"
 
 bool mountSd(void);
-u32 fileRead(void *dest, const char *path);
+u32 fileRead(void *dest, const char *path, u32 maxSize);
