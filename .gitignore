@@ -1,4 +1,6 @@
 out
+hashGenerator
+hashGenerator.exe
 payload_stage1/build
 payload_stage2/build
 payload_stage2/arm11/build
