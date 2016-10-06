@@ -45,8 +45,6 @@ static inline void loadPayload(void)
         ownArm11(true);
         i2cWriteRegister(3, 0x22, 0x2A); //Turn on backlight
     }
-
-    //No payload found/no SD inserted
     else payloadFound = false;
 
     //Jump to payload
