@@ -9,6 +9,11 @@
 
 #include "diskio.h"		/* FatFs lower layer API */
 #include "sdmmc/sdmmc.h"
+#include "../crypto.h"
+
+/* Definitions of physical drive number for each media */
+#define SDCARD  0
+#define CTRNAND 1
 
 /*-----------------------------------------------------------------------*/
 /* Get Drive Status                                                      */
@@ -29,11 +34,26 @@ DSTATUS disk_status (
 /*-----------------------------------------------------------------------*/
 
 DSTATUS disk_initialize (
-	__attribute__((unused))
 	BYTE pdrv				/* Physical drive nmuber to identify the drive */
 )
 {
-	return sdmmc_sdcard_init() ? RES_OK : RES_PARERR;
+        DRESULT ret;
+        static u32 sdmmcInitResult = 4;
+
+        if(sdmmcInitResult == 4) sdmmcInitResult = sdmmc_sdcard_init();
+
+        if(pdrv == CTRNAND)
+        {
+            if(!(sdmmcInitResult & 1))
+            {
+                ctrNandInit();
+                ret = RES_OK;
+            }
+            else ret = RES_PARERR;
+        }
+        else ret = (!(sdmmcInitResult & 2)) ? RES_OK : RES_PARERR;
+
+	return ret;
 }
 
 
@@ -47,14 +67,14 @@ DSTATUS disk_initialize (
 /*-----------------------------------------------------------------------*/
 
 DRESULT disk_read (
-	__attribute__((unused))
 	BYTE pdrv,		/* Physical drive nmuber to identify the drive */
 	BYTE *buff,		/* Data buffer to store read data */
 	DWORD sector,	/* Sector address in LBA */
 	UINT count		/* Number of sectors to read */
 )
 {
-        return (!sdmmc_sdcard_readsectors(sector, count, (BYTE *)buff)) ? RES_OK : RES_PARERR;
+        return ((pdrv == SDCARD && !sdmmc_sdcard_readsectors(sector, count, (BYTE *)buff)) ||
+                (pdrv == CTRNAND && !ctrNandRead(sector, count, (BYTE *)buff))) ? RES_OK : RES_PARERR;
 }
 
 

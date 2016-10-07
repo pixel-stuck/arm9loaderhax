@@ -4,6 +4,7 @@
 
 #include "types.h"
 #include "memory.h"
+#include "crypto.h"
 #include "i2c.h"
 #include "cache.h"
 #include "fs.h"
@@ -28,36 +29,45 @@ static void ownArm11(bool isScreenInit)
     while(*(vu32 *)A11_ENTRYPOINT != 0);
 }
 
+static void loadPayload(bool isNand)
+{
+    bool payloadFound;
+
+    //No-screeninit payload
+    if(fileRead((void *)PAYLOAD_ADDRESS, isNand ? "1:/arm9loaderhax.bin" : "/arm9loaderhax.bin", MAX_PAYLOAD_SIZE) != 0)
+    {
+        payloadFound = true;
+        ownArm11(false);
+    }
+
+    //Screeninit payload
+    else if(fileRead((void *)PAYLOAD_ADDRESS, isNand ? "1:/arm9loaderhax_si.bin" : "/arm9loaderhax_si.bin", MAX_PAYLOAD_SIZE) != 0)
+    {
+        payloadFound = true;
+        ownArm11(true);
+        i2cWriteRegister(3, 0x22, 0x2A); //Turn on backlight
+    }
+    else payloadFound = false;
+
+    //Jump to payload
+    if(payloadFound)
+    {
+        if(isNand) restoreShaHashBackup();
+        flushEntireDCache();
+        flushEntireICache();
+        ((void (*)())PAYLOAD_ADDRESS)();
+    }
+}
+
 void main(void)
 {
     if(mountSd())
     {
-        bool payloadFound;
-
-        //No-screeninit payload
-        if(fileRead((void *)PAYLOAD_ADDRESS, "arm9loaderhax.bin", MAX_PAYLOAD_SIZE) != 0)
-        {
-            payloadFound = true;
-            ownArm11(false);
-        }
-
-        //Screeninit payload
-        else if(fileRead((void *)PAYLOAD_ADDRESS, "arm9loaderhax_si.bin", MAX_PAYLOAD_SIZE) != 0)
-        {
-            payloadFound = true;
-            ownArm11(true);
-            i2cWriteRegister(3, 0x22, 0x2A); //Turn on backlight
-        }
-        else payloadFound = false;
-
-        //Jump to payload
-        if(payloadFound)
-        {
-            flushEntireDCache();
-            flushEntireICache();
-            ((void (*)())PAYLOAD_ADDRESS)();
-        }
+        loadPayload(false);
+        unmountSd();
     }
+
+    if(mountCtrNand()) loadPayload(true);
 
     //Shutdown
     flushEntireDCache();

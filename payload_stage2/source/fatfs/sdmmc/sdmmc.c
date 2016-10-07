@@ -25,7 +25,7 @@
 #include "sdmmc.h"
 #include "delay.h"
 
-//static struct mmcdevice handleNAND;
+static struct mmcdevice handleNAND;
 static struct mmcdevice handleSD;
 
 static inline u16 sdmmc_read16(u16 reg)
@@ -233,7 +233,6 @@ int __attribute__((noinline)) sdmmc_sdcard_readsectors(u32 sector_no, u32 numsec
     return geterror(&handleSD);
 }
 
-/*
 int __attribute__((noinline)) sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out)
 {
     if(handleNAND.isSDHC == 0) sector_no <<= 9;
@@ -248,7 +247,6 @@ int __attribute__((noinline)) sdmmc_nand_readsectors(u32 sector_no, u32 numsecto
     inittarget(&handleSD);
     return geterror(&handleNAND);
 }
-*/
 
 /*
 int __attribute__((noinline)) sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in) //experimental
@@ -321,7 +319,6 @@ static void InitSD()
     *(vu16 *)0x10006008 = 0; //SDSTOP
 }
 
-/*
 static int Nand_Init()
 {
     //NAND
@@ -383,7 +380,6 @@ static int Nand_Init()
 
     return 0;
 }
-*/
 
 static int SD_Init()
 {
@@ -458,7 +454,6 @@ static int SD_Init()
     return 0;
 }
 
-/*
 void sdmmc_get_cid(bool isNand, u32 *info)
 {
     struct mmcdevice *device = isNand ? &handleNAND : &handleSD;
@@ -480,11 +475,12 @@ void sdmmc_get_cid(bool isNand, u32 *info)
     // CMD7
     sdmmc_send_command(device, 0x10507, device->initarg << 0x10);
 }
-*/
 
-bool sdmmc_sdcard_init()
+u32 sdmmc_sdcard_init()
 {
+    u32 ret = 0;
     InitSD();
-    //Nand_Init();
-    return SD_Init() == 0;
+    if(Nand_Init() != 0) ret &= 1;
+    if(SD_Init() != 0) ret &= 2;
+    return ret;
 }

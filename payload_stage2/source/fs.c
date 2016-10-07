@@ -12,6 +12,16 @@ bool mountSd(void)
     return f_mount(&fs, "0:", 1) == FR_OK;
 }
 
+void unmountSd(void)
+{
+    f_mount(NULL, "0:", 1);
+}
+
+bool mountCtrNand(void)
+{
+    return f_mount(&fs, "1:", 1) == FR_OK;
+}
+
 u32 fileRead(void *dest, const char *path, u32 maxSize)
 {
     FIL file;
