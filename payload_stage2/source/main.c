@@ -34,14 +34,14 @@ static void loadPayload(bool isNand)
     bool payloadFound;
 
     //No-screeninit payload
-    if(fileRead((void *)PAYLOAD_ADDRESS, isNand ? "1:/arm9loaderhax.bin" : "/arm9loaderhax.bin", MAX_PAYLOAD_SIZE) != 0)
+    if(fileRead((void *)PAYLOAD_ADDRESS, "arm9loaderhax.bin", MAX_PAYLOAD_SIZE) != 0)
     {
         payloadFound = true;
         ownArm11(false);
     }
 
     //Screeninit payload
-    else if(fileRead((void *)PAYLOAD_ADDRESS, isNand ? "1:/arm9loaderhax_si.bin" : "/arm9loaderhax_si.bin", MAX_PAYLOAD_SIZE) != 0)
+    else if(fileRead((void *)PAYLOAD_ADDRESS, "arm9loaderhax_si.bin", MAX_PAYLOAD_SIZE) != 0)
     {
         payloadFound = true;
         ownArm11(true);
