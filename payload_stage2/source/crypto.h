@@ -102,6 +102,8 @@
 
 #define PDN_MPCORE_CFG (*(vu32 *)0x10140FFC)
 
+#define ISN3DS (PDN_MPCORE_CFG == 7)
+
 void ctrNandInit(void);
 int ctrNandRead(u32 sector, u32 sectorCount, u8 *outbuf);
 void restoreShaHashBackup(void);

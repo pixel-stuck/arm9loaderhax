@@ -309,7 +309,7 @@ void ctrNandInit(void)
     sha(shaSum, cid, sizeof(cid), SHA_256_MODE);
     memcpy(nandCtr, shaSum, sizeof(nandCtr));
 
-    if(PDN_MPCORE_CFG == 7)
+    if(ISN3DS)
     {
         u8 __attribute__((aligned(4))) keyY0x5[AES_BLOCK_SIZE] = {0x4D, 0x80, 0x4F, 0x4E, 0x99, 0x90, 0x19, 0x46, 0x13, 0xA2, 0x04, 0xAC, 0x58, 0x44, 0x60, 0xBE};
         aes_setkey(0x05, keyY0x5, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);

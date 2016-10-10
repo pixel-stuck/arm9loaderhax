@@ -45,7 +45,7 @@ static void loadPayload(bool isNand)
     {
         payloadFound = true;
         ownArm11(true);
-        i2cWriteRegister(3, 0x22, 0x2A); //Turn on backlight
+        i2cWriteRegister(I2C_DEV_MCU, 0x22, 0x2A); //Turn on backlight
     }
     else payloadFound = false;
 
