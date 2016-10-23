@@ -25,9 +25,10 @@ bool mountCtrNand(void)
 u32 fileRead(void *dest, const char *path, u32 maxSize)
 {
     FIL file;
-    u32 ret = 0;
+    u32 ret;
 
-    if(f_open(&file, path, FA_READ) == FR_OK)
+    if(f_open(&file, path, FA_READ) != FR_OK) ret = 0;
+    else
     {
         u32 size = f_size(&file);
         if(size <= maxSize)
