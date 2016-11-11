@@ -293,17 +293,17 @@ static void sha(void *res, const void *src, u32 size, u32 mode)
 
 /*****************************************************************/
 
-static u8 __attribute__((aligned(4))) nandCtr[AES_BLOCK_SIZE];
+__attribute__((aligned(4))) static u8 nandCtr[AES_BLOCK_SIZE],
+                                      shaHashBackup[SHA_256_HASH_SIZE];
 static u8 nandSlot;
 static u32 fatStart;
-static u8 __attribute__((aligned(4))) shaHashBackup[SHA_256_HASH_SIZE];
 
 void ctrNandInit(void)
 {
     memcpy(shaHashBackup, (void *)REG_SHA_HASH, sizeof(shaHashBackup));
 
-    u8 __attribute__((aligned(4))) cid[AES_BLOCK_SIZE];
-    u8 __attribute__((aligned(4))) shaSum[SHA_256_HASH_SIZE];
+    __attribute__((aligned(4))) u8 cid[AES_BLOCK_SIZE],
+                                   shaSum[SHA_256_HASH_SIZE];
 
     sdmmc_get_cid(1, (u32 *)cid);
     sha(shaSum, cid, sizeof(cid), SHA_256_MODE);
@@ -311,7 +311,7 @@ void ctrNandInit(void)
 
     if(ISN3DS)
     {
-        u8 __attribute__((aligned(4))) keyY0x5[AES_BLOCK_SIZE] = {0x4D, 0x80, 0x4F, 0x4E, 0x99, 0x90, 0x19, 0x46, 0x13, 0xA2, 0x04, 0xAC, 0x58, 0x44, 0x60, 0xBE};
+        __attribute__((aligned(4))) u8 keyY0x5[AES_BLOCK_SIZE] = {0x4D, 0x80, 0x4F, 0x4E, 0x99, 0x90, 0x19, 0x46, 0x13, 0xA2, 0x04, 0xAC, 0x58, 0x44, 0x60, 0xBE};
         aes_setkey(0x05, keyY0x5, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
 
         nandSlot = 0x05;
@@ -326,7 +326,7 @@ void ctrNandInit(void)
 
 int ctrNandRead(u32 sector, u32 sectorCount, u8 *outbuf)
 {
-    u8 __attribute__((aligned(4))) tmpCtr[sizeof(nandCtr)];
+    __attribute__((aligned(4))) u8 tmpCtr[sizeof(nandCtr)];
     memcpy(tmpCtr, nandCtr, sizeof(nandCtr));
     aes_advctr(tmpCtr, ((sector + fatStart) * 0x200) / AES_BLOCK_SIZE, AES_INPUT_BE | AES_INPUT_NORMAL);
 
